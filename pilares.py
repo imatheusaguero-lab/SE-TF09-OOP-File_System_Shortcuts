@@ -211,3 +211,64 @@ def tentar(rotulo, acao):
         print(rotulo, "-> passou (!)")
     except Exception as erro:
         print(rotulo, "->", type(erro).__name__ + ":", erro)
+
+
+# Executa os testes somente quando o arquivo for iniciado diretamente.
+if __name__ == "__main__":
+
+    # 1. Cria a estrutura de diretorios.
+    # C:/Users/mathe/Desktop
+    # C:/Users/mathe/Documentos
+    disco = Pasta("C:")
+    usuarios = Pasta("Users", disco)
+    usuario = Pasta("mathe", usuarios)
+    desktop = Pasta("Desktop", usuario)
+    documentos = Pasta("Documentos", usuario)
+
+    # 2. Cria dois arquivos com tamanhos diferentes.
+    arquivo_codigo = Arquivo("projeto.py", 300, desktop)
+    arquivo_notas = Arquivo("notas.txt", 120, documentos)
+
+    # 3. Cria um atalho para um arquivo e outro para uma pasta.
+    atalho_notas = Atalho("Notas.lnk", arquivo_notas, desktop)
+    atalho_documentos = Atalho(
+        "Documentos.lnk", documentos, desktop
+    )
+
+    # 4. Cria a lixeira e adiciona um arquivo descartado.
+    lixeira = Lixeira()
+    lixeira.descartar(Arquivo("antigo.txt", 40))
+
+    # 5. Mostra todos os itens da arvore de arquivos.
+    print("\n========== ARVORE DE ARQUIVOS ==========")
+    disco.mostrar()
+
+    # 6. Calcula o espaco ocupado por diferentes objetos.
+    # 120 + (300 + 1 + 1) + 40 = 462 bytes
+    print("\n========== ESPACO TOTAL ==========")
+    total = espaco_total([arquivo_notas, desktop, lixeira])
+    print(f"Espaco total: {total} B")
+
+    # 7. Testa o encapsulamento da propriedade destino.
+    # setattr tenta alterar uma propriedade sem setter.
+    # Resultado esperado: AttributeError.
+    print("\n========== TESTES DE VALIDACAO ==========")
+
+    tentar(
+        "Alterar destino diretamente",
+        lambda: setattr(atalho_notas, "destino", arquivo_codigo)
+    )
+
+    # 8. Testa se um atalho pode apontar para si mesmo.
+    # Resultado esperado: ValueError.
+    tentar(
+        "Atalho apontando para si mesmo",
+        lambda: atalho_notas.redirecionar(atalho_notas)
+    )
+
+    # 9. Testa se um atalho pode apontar para sua pasta ancestral.
+    # Resultado esperado: ValueError.
+    tentar(
+        "Atalho apontando para Desktop",
+        lambda: atalho_notas.redirecionar(desktop)
+    )
