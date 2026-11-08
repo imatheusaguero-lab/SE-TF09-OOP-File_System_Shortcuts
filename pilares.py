@@ -130,6 +130,56 @@ class Pasta(Item):
             filho.mostrar()
 
 
+class Atalho(Item):
+    # O Atalho herda os atributos e metodos da classe Item.
+    # O unico atributo novo sera o destino.
+    __slots__ = ("__destino",)
+
+    def __init__(self, nome, destino, pai=None):
+        # Inicializa nome e pai utilizando o construtor de Item.
+        super().__init__(nome, pai)
+
+        # Utiliza o metodo de validacao para definir o destino.
+        self.redirecionar(destino)
+
+    @property
+    def destino(self):
+        # Permite consultar o destino, mas nao altera-lo diretamente.
+        return self.__destino
+
+    def redirecionar(self, novo_destino):
+        # Impede que um atalho aponte para si mesmo.
+        if novo_destino is self:
+            raise ValueError("O atalho nao pode apontar para si mesmo.")
+
+        # Percorre os pais do atalho para evitar destinos ancestrais.
+        # Exemplo: Desktop -> mathe -> Users -> C: -> None
+        ancestral = self.pai
+
+        while ancestral is not None:
+            if novo_destino is ancestral:
+                raise ValueError(
+                    "O atalho nao pode apontar para uma pasta ancestral."
+                )
+
+            ancestral = ancestral.pai
+
+        # Atualiza o destino somente apos passar pelas validacoes.
+        self.__destino = novo_destino
+
+    def tamanho(self):
+        # O tamanho do atalho e sempre 1 byte.
+        # Exemplo: arquivo com 5000 B -> atalho com 1 B.
+        return 1
+
+    def mostrar(self):
+        # Calcula o recuo conforme a profundidade na arvore.
+        # Exemplo: profundidade 2 -> 8 espacos.
+        recuo = "    " * self.profundidade()
+
+        # Exemplo: Notas.lnk -> C:/Users/mathe/notas.txt
+        print(f"{recuo}{self.nome} -> {self.destino.caminho()}")
+
 # Outra classe que assina o contrato SEM ser da árvore: a Lixeira.
 class Lixeira(Medivel):
     __slots__ = ("__descartados",)
